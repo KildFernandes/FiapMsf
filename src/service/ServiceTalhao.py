@@ -7,105 +7,86 @@ class ServiceTalhao:
         self.repository = TalhaoRepository(connection)
     
     def menu(self):
-        print("\n=== CRUD Talhão ===")
-        print("1. Criar Talhão")
-        print("2. Ler Talhão")
-        print("3. Atualizar Talhão")
-        print("4. Deletar Talhão")
-        print("5. Mostrar todos os Talhões de uma cultura")
-        print("6. Mostrar todos os Talhões")
-        print("0. Voltar ao menu principal")
-
+        return "Talhão", [
+            "Criar Talhão",
+            "Ler Talhão",
+            "Atualizar Talhão",
+            "Deletar Talhão",
+            "Mostrar todos os Talhões de uma cultura",
+            "Mostrar todos os Talhões"
+        ]
+    
     def criar_talhao(self, get_cultura_id):
         cultura = get_cultura_id()
         if not cultura:
-            print("Nao existe cultura com este Id. Por favor, use um ID diferente.")
+            print("Não existe cultura com este ID. Por favor, use um ID diferente.")
             return
+        
+        nome = input("Nome do talhão: ")
+        forma = input("Forma (retangulo, triangulo, trapezio): ")
+        data_input = input("Data (YYYY-MM-DD): ")
+        
+        try:
+           data = datetime.strptime(data_input, '%Y-%m-%d').date()
+        except ValueError:
+            print("Data inválida. Por favor, insira a data no formato correto: YYYY-MM-DD.")
+            return  # Prevent further execution if date is invalid
+
+        # Atributos específicos da forma
+        comprimento = largura = base = altura = base_maior = base_menor = None
+
+        if forma == 'retangulo':
+            comprimento = float(input("Comprimento: "))
+            largura = float(input("Largura: "))
+        elif forma == 'triangulo':
+            base = float(input("Base: "))
+            altura = float(input("Altura: "))
+        elif forma == 'trapezio':
+            base_maior = float(input("Base maior: "))
+            base_menor = float(input("Base menor: "))
+            altura = float(input("Altura: "))
         else:
-            nome = input("Nome do talhão: ")
-            forma = input("Forma (retangulo, triangulo, trapezio): ")
-            data_input = input("Data (YYYY-MM-DD): ")
-            try:
-                # Tenta converter a data inserida para o formato YYYY-MM-DD
-                data = datetime.strptime(data_input, '%Y-%m-%d').date()
-            except ValueError:
-                print("Forma inválida. Por favor, insira a data no formato correto: YYYY-MM-DD.")
+            print("Forma inválida. Escolha entre 'retangulo', 'triangulo', ou 'trapezio'.")
+            return
 
-            # Atributos específicos da forma
-            comprimento = largura = base = altura = base_maior = base_menor = None
-
-            if forma == 'retangulo':
-                comprimento = float(input("Comprimento: "))
-                largura = float(input("Largura: "))
-            elif forma == 'triangulo':
-                base = float(input("Base: "))
-                altura = float(input("Altura: "))
-            elif forma == 'trapezio':
-                base_maior = float(input("Base maior: "))
-                base_menor = float(input("Base menor: "))
-                altura = float(input("Altura: "))
-            else:
-                print("Forma inválida.")
-                return
-
-            talhao = Talhao(
-                id=None,  # Deixe o banco de dados gerar o ID automaticamente
-                nome=nome,
-                forma=forma,
-                comprimento=comprimento,
-                largura=largura,
-                base=base,
-                altura=altura,
-                base_maior=base_maior,
-                base_menor=base_menor,
-                data=data,
-                cultura_id=cultura['id']
-            )
-            self.repository.salvar_talhao(talhao)
-            print("Talhão criado com sucesso.")
+        talhao = Talhao(
+            id=None,  # Deixe o banco de dados gerar o ID automaticamente
+            nome=nome,
+            forma=forma,
+            comprimento=comprimento,
+            largura=largura,
+            base=base,
+            altura=altura,
+            base_maior=base_maior,
+            base_menor=base_menor,
+            data=data,
+            cultura_id=cultura[0]  # Assuming cultura is a tuple, access ID via index
+        )
+        self.repository.salvar_talhao(talhao)
+        print("Talhão criado com sucesso.")
 
     def mostrar_talhao(self):
-        """
-        Mostra os detalhes de um talhão pelo seu ID.
-        """
         talhao_id = int(input("ID do talhão: "))
         talhao = self.repository.obter_talhao_por_id(talhao_id)
         if not talhao:
             print(f"Nenhum talhão encontrado para o ID: {talhao_id}.")
         else:
-            print(f"Talhão ID: {talhao['id']}, Nome: {talhao['nome']}, Forma: {talhao['forma']}, "
-                f"Comprimento: {talhao['comprimento']}, Largura: {talhao['largura']}, "
-                f"Base: {talhao['base']}, Altura: {talhao['altura']}, "
-                f"Base Maior: {talhao['base_maior']}, Base Menor: {talhao['base_menor']}, "
-                f"Data: {talhao['data']}, Cultura ID: {talhao['cultura_id']}")
+            print(f"Talhão ID: {talhao[0]}, Nome: {talhao[1]}, Forma: {talhao[2]}, "
+                  f"Comprimento: {talhao[3]}, Largura: {talhao[4]}, "
+                  f"Base: {talhao[5]}, Altura: {talhao[6]}, "
+                  f"Base Maior: {talhao[7]}, Base Menor: {talhao[8]}, "
+                  f"Data: {talhao[9]}, Cultura ID: {talhao[10]}")
 
-    def get_talhao_id(self):
-        """
-        Mostra os detalhes de um talhão pelo seu ID.
-        """
-        talhao_id = int(input("ID do talhão: "))
+    def get_talhao_por_id(self, talhao_id=None):
+        if not talhao_id:
+            talhao_id = int(input("ID do talhão: "))
         talhao = self.repository.obter_talhao_por_id(talhao_id)
         if not talhao:
             print(f"Nenhum talhão encontrado para o ID: {talhao_id}.")
             return None
-        else:
-            return talhao
-
-    def get_talhao_por_id(self, talhao_id):
-        """
-        Mostra os detalhes de um talhão pelo seu ID.
-        """
-        talhao = self.repository.obter_talhao_por_id(talhao_id)
-        if not talhao:
-            print(f"Nenhum talhão encontrado para o ID: {talhao_id}.")
-            return None
-        else:
-            return talhao
+        return talhao
 
     def mostrar_todos_os_talhoes_de_uma_cultura(self):
-        """
-        Mostra todos os talhões associados a uma cultura específica.
-        """
         cultura_id = int(input("ID da cultura: "))
         talhoes = self.repository.obter_todos_os_talhoes_por_cultura(cultura_id)
         
@@ -114,80 +95,72 @@ class ServiceTalhao:
         else:
             print(f"Talhões associados à Cultura ID: {cultura_id}:")
             for talhao in talhoes:
-                print(f"  Talhão ID: {talhao['id']}, Nome: {talhao['nome']}, "
-                    f"Forma: {talhao['forma']}, Comprimento: {talhao['comprimento']}, Largura: {talhao['largura']}, "
-                    f"Base: {talhao['base']}, Altura: {talhao['altura']}, Base Maior: {talhao['base_maior']}, "
-                    f"Base Menor: {talhao['base_menor']}, Data: {talhao['data']}")
-
-
+                print(f"  Talhão ID: {talhao[0]}, Nome: {talhao[1]}, "
+                      f"Forma: {talhao[2]}, Comprimento: {talhao[3]}, Largura: {talhao[4]}, "
+                      f"Base: {talhao[5]}, Altura: {talhao[6]}, Base Maior: {talhao[7]}, "
+                      f"Base Menor: {talhao[8]}, Data: {talhao[9]}")
 
     def atualizar_talhao(self, get_cultura_id):
         talhao_id = int(input("ID do talhão: "))
         talhao = self.repository.obter_talhao_por_id(talhao_id)
         if not talhao:
-            print("Nao existe talhao com este Id. Por favor, use um ID diferente.")
+            print("Não existe talhão com este ID. Por favor, use um ID diferente.")
             return
+        
+        cultura = get_cultura_id(talhao[10])  # Cultura ID is at index 10
+        if not cultura:
+            print("Não existe cultura com este ID. Por favor, use um ID diferente.")
+            return
+        
+        nome = input("Novo nome do talhão: ")
+        forma = input("Nova forma (retangulo, triangulo, trapezio): ")
+        data_input = input("Data (YYYY-MM-DD): ")
+        
+        try:
+            data = datetime.strptime(data_input, '%Y-%m-%d').date()
+        except ValueError:
+            print("Data inválida. Por favor, insira a data no formato correto: YYYY-MM-DD.")
+            return
+
+        # Atributos específicos da forma
+        comprimento = largura = base = altura = base_maior = base_menor = None
+
+        if forma == 'retangulo':
+            comprimento = float(input("Comprimento: "))
+            largura = float(input("Largura: "))
+        elif forma == 'triangulo':
+            base = float(input("Base: "))
+            altura = float(input("Altura: "))
+        elif forma == 'trapezio':
+            base_maior = float(input("Base maior: "))
+            base_menor = float(input("Base menor: "))
+            altura = float(input("Altura: "))
         else:
-            cultura = get_cultura_id(talhao['cultura_id'])
-            if not cultura:
-                print("Nao existe cultura com este Id. Por favor, use um ID diferente.")
-                return
-            new_cultura_id = int(input("ID da cultura a ser atualizada: "))
-            cultura_id = get_cultura_id(new_cultura_id)
-            nome = input("Novo nome do talhão: ")
-            forma = input("Nova forma (retangulo, triangulo, trapezio): ")
-            data_input = input("Data (YYYY-MM-DD): ")
-            try:
-                # Tenta converter a data inserida para o formato YYYY-MM-DD
-                data = datetime.strptime(data_input, '%Y-%m-%d').date()
-            except ValueError:
-                print("Forma inválida. Por favor, insira a data no formato correto: YYYY-MM-DD.")
+            print("Forma inválida. Escolha entre 'retangulo', 'triangulo', ou 'trapezio'.")
+            return
 
-            
-            if not cultura_id:
-                print("Nao existe cultura com este Id. Por favor, use um ID diferente.")
-                return
-            # Atributos específicos da forma
-            comprimento = largura = base = altura = base_maior = base_menor = None
+        new_talhao = Talhao(
+            id=talhao[0],  # Using ID from the retrieved talhao
+            nome=nome,
+            forma=forma,
+            comprimento=comprimento,
+            largura=largura,
+            base=base,
+            altura=altura,
+            base_maior=base_maior,
+            base_menor=base_menor,
+            data=data,
+            cultura_id=cultura[0]  # Assuming cultura is a tuple, access ID via index
+        )
 
-            if forma == 'retangulo':
-                comprimento = float(input("Comprimento: "))
-                largura = float(input("Largura: "))
-            elif forma == 'triangulo':
-                base = float(input("Base: "))
-                altura = float(input("Altura: "))
-            elif forma == 'trapezio':
-                base_maior = float(input("Base maior: "))
-                base_menor = float(input("Base menor: "))
-                altura = float(input("Altura: "))
-            else:
-                print("Forma inválida.")
-                return
-
-            new_talhao = Talhao(
-                id=talhao['id'],  # Deixe o banco de dados gerar o ID automaticamente
-                nome=nome,
-                forma=forma,
-                comprimento=comprimento,
-                largura=largura,
-                base=base,
-                altura=altura,
-                base_maior=base_maior,
-                base_menor=base_menor,
-                data=data,
-                cultura_id=cultura['id']
-            )
-
-            # Chamando o método do repositório para atualizar no banco de dados
-            self.repository.atualizar_talhao(talhao['id'], new_talhao)
-
-            print("Talhão atualizado com sucesso.")
+        self.repository.atualizar_talhao(talhao[0], new_talhao)
+        print("Talhão atualizado com sucesso.")
         
     def deletar_talhao(self):
-        talhao_id = int(input("ID do talhao a ser deletado: "))
+        talhao_id = int(input("ID do talhão a ser deletado: "))
         talhao = self.repository.obter_talhao_por_id(talhao_id)
         if not talhao:
-            print("Talhao não encontrado.")
+            print("Talhão não encontrado.")
         else:
             self.repository.deletar_talhao(talhao_id)
-            print("Talhao deletado com sucesso.")
+            print("Talhão deletado com sucesso.")

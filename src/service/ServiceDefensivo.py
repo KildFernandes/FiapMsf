@@ -1,6 +1,5 @@
 from repository.DefensivoRepository import DefensivoRepository
 from entity.Defensivo import Defensivo
-import mysql.connector
 from datetime import datetime
 
 class ServiceDefensivo:
@@ -8,13 +7,13 @@ class ServiceDefensivo:
         self.repository = DefensivoRepository(connection)
 
     def menu(self):
-        print("\n=== CRUD Defensivo ===")
-        print("1. Criar Defensivo")
-        print("2. Ler Defensivo")
-        print("3. Atualizar Defensivo")
-        print("4. Deletar Defensivo")
-        print("5. Mostrar todos os Defensivos")
-        print("0. Voltar ao menu principal")
+        return "Defensivo", [
+            "Criar Defensivo",
+            "Ler Defensivo",
+            "Atualizar Defensivo",
+            "Deletar Defensivo",
+            "Mostrar todos os Defensivos"
+        ]
 
     def criar_defensivo(self, praga_existe, mostrar_metodo_controle_por_id):
         """
@@ -40,7 +39,7 @@ class ServiceDefensivo:
             print("Forma inválida. Por favor, insira a data no formato correto: YYYY-MM-DD.")
 
         # Cria o defensivo
-        defensivo = Defensivo(data=data, praga_id=praga['id'], metodo_controle_id=metodo_controle['id'])
+        defensivo = Defensivo(data=data, praga_id=praga[0], metodo_controle_id=metodo_controle[0])
         self.repository.salvar_defensivo(defensivo)
         print("Defensivo criado com sucesso.")
 
@@ -53,8 +52,8 @@ class ServiceDefensivo:
         if not defensivo:
             print(f"Nenhum defensivo encontrado para o ID: {defensivo_id}.")
         else:
-            print(f"ID: {defensivo['id']}, Data: {defensivo['data']}, Praga ID: {defensivo['praga_id']}, "
-                  f"Método de Controle ID: {defensivo['metodo_controle_id']}")
+            print(f"ID: {defensivo[0]}, Data: {defensivo[1]}, Praga ID: {defensivo[2]}, "
+                  f"Método de Controle ID: {defensivo[3]}")
 
     def mostrar_todos_os_defensivos(self):
         """
@@ -65,8 +64,8 @@ class ServiceDefensivo:
             print("Nenhum defensivo cadastrado.")
         else:
             for defensivo in defensivos:
-                print(f"ID: {defensivo['id']}, Data: {defensivo['data']}, Praga ID: {defensivo['praga_id']}, "
-                      f"Método de Controle ID: {defensivo['metodo_controle_id']}")
+                print(f"ID: {defensivo[0]}, Data: {defensivo[1]}, Praga ID: {defensivo[2]}, "
+                      f"Método de Controle ID: {defensivo[3]}")
 
     def atualizar_defensivo(self, praga_existe, mostrar_metodo_controle_por_id):
         """
@@ -101,8 +100,8 @@ class ServiceDefensivo:
         defensivo_atualizado = Defensivo(
             id=defensivo_id,
             data=data,
-            praga_id=praga['id'],
-            metodo_controle_id=metodo_controle['id']
+            praga_id=praga[0],
+            metodo_controle_id=metodo_controle[0]
         )
         self.repository.atualizar_defensivo(defensivo_id, defensivo_atualizado)
         print("Defensivo atualizado com sucesso.")

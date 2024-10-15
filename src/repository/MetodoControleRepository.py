@@ -1,5 +1,5 @@
 from repository.BaseRepository import BaseRepository
-import mysql.connector
+import oracledb
 
 class MetodoControleRepository(BaseRepository):
     def __init__(self, connection):
@@ -17,8 +17,10 @@ class MetodoControleRepository(BaseRepository):
                 "metodo": metodo_controle.metodo,
                 "periodo_ideal": metodo_controle.periodo_ideal,
                 "produto_recomendado": metodo_controle.produto_recomendado,
+                "dose_recomendada": metodo_controle.dose_recomendada,  # Novo campo
+                "metodo_alternativo": metodo_controle.metodo_alternativo  # Novo campo
             })
-        except mysql.connector.Error as e:
+        except oracledb.Error as e:
             print(f"Erro ao inserir dados em metodo_controle: {e}")
             return None
 
@@ -34,8 +36,10 @@ class MetodoControleRepository(BaseRepository):
                 "metodo": metodo_controle.metodo,
                 "periodo_ideal": metodo_controle.periodo_ideal,
                 "produto_recomendado": metodo_controle.produto_recomendado,
-            }, "id = %s", {"id": metodo_controle_id})  # Usando %s como placeholder para MySQL
-        except mysql.connector.Error as e:
+                "dose_recomendada": metodo_controle.dose_recomendada,  # Novo campo
+                "metodo_alternativo": metodo_controle.metodo_alternativo  # Novo campo
+            }, "id = :1", {"id": metodo_controle_id})  # Usando :1 como placeholder para Oracle
+        except oracledb.Error as e:
             print(f"Erro ao atualizar metodo_controle ID {metodo_controle_id}: {e}")
 
     def deletar_metodo_controle(self, metodo_controle_id):
@@ -45,8 +49,8 @@ class MetodoControleRepository(BaseRepository):
         :param metodo_controle_id: ID do método de controle a ser deletado.
         """
         try:
-            self.delete("metodo_controle", "id = %s", {"id": metodo_controle_id})  # Usando %s como placeholder para MySQL
-        except mysql.connector.Error as e:
+            self.delete("metodo_controle", "id = :1", {"id": metodo_controle_id})  # Usando :1 como placeholder para Oracle
+        except oracledb.Error as e:
             print(f"Erro ao deletar metodo_controle ID {metodo_controle_id}: {e}")
 
     def obter_metodo_controle_por_id(self, metodo_controle_id):
@@ -58,7 +62,7 @@ class MetodoControleRepository(BaseRepository):
         """
         try:
             return self.get_by_id("metodo_controle", metodo_controle_id)
-        except mysql.connector.Error as e:
+        except oracledb.Error as e:
             print(f"Erro ao obter metodo_controle ID {metodo_controle_id}: {e}")
             return None
 
@@ -70,7 +74,7 @@ class MetodoControleRepository(BaseRepository):
         """
         try:
             return self.get_all("metodo_controle")
-        except mysql.connector.Error as e:
+        except oracledb.Error as e:
             print(f"Erro ao obter todos os métodos de controle: {e}")
             return []
 
@@ -81,12 +85,12 @@ class MetodoControleRepository(BaseRepository):
         :param produto_id: ID do produto para filtrar os métodos de controle.
         :return: Lista de métodos de controle associados ao produto.
         """
-        query = "SELECT * FROM metodo_controle WHERE produto_id = %s"
-        cursor = self.connection.cursor(dictionary=True)
+        query = "SELECT * FROM metodo_controle WHERE produto_recomendado = :1"  # Usando placeholder para Oracle
+        cursor = self.connection.cursor()
         try:
             cursor.execute(query, (produto_id,))
             return cursor.fetchall()
-        except mysql.connector.Error as e:
+        except oracledb.Error as e:
             print(f"Erro ao obter métodos de controle para o produto ID {produto_id}: {e}")
             return []
         finally:

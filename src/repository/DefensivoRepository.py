@@ -1,5 +1,5 @@
 from repository.BaseRepository import BaseRepository
-import mysql.connector
+import oracledb
 from datetime import datetime
 
 class DefensivoRepository(BaseRepository):
@@ -14,17 +14,23 @@ class DefensivoRepository(BaseRepository):
         :return: ID do novo registro inserido.
         """
         try:
-            # Certifique-se de que defensivo.data é um objeto datetime
-            data_formatada = defensivo.data.strftime('%Y-%m-%d') if defensivo.data else None
+            # No need to format the date, pass it directly to be handled by Oracle
+            if isinstance(defensivo.data, datetime):
+                # Format the date to a string if it's a datetime object
+                data_formatada = defensivo.data.strftime('%Y-%m-%d')
+            else:
+                data_formatada = defensivo.data  # Assume it's already a correctly formatted string
 
             return self.insert("defensivo", {
-                "data": data_formatada,
+                "data": data_formatada,  # Pass the date as a string or datetime object
                 "praga_id": defensivo.praga_id,
                 "metodo_controle_id": defensivo.metodo_controle_id,
             })
-        except mysql.connector.Error as e:
+        except oracledb.Error as e:
             print(f"Erro ao inserir dados em defensivo: {e}")
             return None
+
+
     def atualizar_defensivo(self, defensivo_id, defensivo):
         """
         Atualiza os dados de um defensivo existente no banco de dados.
@@ -33,13 +39,18 @@ class DefensivoRepository(BaseRepository):
         :param defensivo: Objeto Defensivo contendo os novos dados.
         """
         try:
-            data_formatada = defensivo.data.strftime('%Y-%m-%d') if defensivo.data else None
+            if isinstance(defensivo.data, datetime):
+                # Format the date to a string if it's a datetime object
+                data_formatada = defensivo.data.strftime('%Y-%m-%d')
+            else:
+                data_formatada = defensivo.data  # Assume it's already a correctly formatted string
+                
             self.update("defensivo", {
                 "data": data_formatada,
                 "praga_id": defensivo.praga_id,
                 "metodo_controle_id": defensivo.metodo_controle_id,
-            }, "id = %s", {"id": defensivo_id})  # Usando %s como placeholder para MySQL
-        except mysql.connector.Error as e:
+            }, "id = :1", {"id": defensivo_id})  # Usando :1 como placeholder para Oracle
+        except oracledb.Error as e:
             print(f"Erro ao atualizar defensivo ID {defensivo_id}: {e}")
 
     def deletar_defensivo(self, defensivo_id):
@@ -49,8 +60,8 @@ class DefensivoRepository(BaseRepository):
         :param defensivo_id: ID do defensivo a ser deletado.
         """
         try:
-            self.delete("defensivo", "id = %s", {"id": defensivo_id})  # Usando %s como placeholder para MySQL
-        except mysql.connector.Error as e:
+            self.delete("defensivo", "id = :1", {"id": defensivo_id})  # Usando :1 como placeholder para Oracle
+        except oracledb.Error as e:
             print(f"Erro ao deletar defensivo ID {defensivo_id}: {e}")
 
     def obter_defensivo_por_id(self, defensivo_id):

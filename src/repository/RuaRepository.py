@@ -1,5 +1,5 @@
 from repository.BaseRepository import BaseRepository
-import mysql.connector
+import oracledb
 
 class RuaRepository(BaseRepository):
     def __init__(self, connection):
@@ -13,15 +13,13 @@ class RuaRepository(BaseRepository):
         :return: ID do novo registro inserido.
         """
         try:
-            # Converter a data para string no formato 'YYYY-MM-DD'
-
             return self.insert("ruas", {
                 "nome": rua.nome,
                 "comprimento": rua.comprimento,
                 "largura": rua.largura,
                 "talhao_id": rua.talhao_id  # Chave estrangeira para 'talhao'
             })
-        except mysql.connector.Error as e:
+        except oracledb.Error as e:
             print(f"Erro ao inserir dados em rua: {e}")
             return None
 
@@ -38,8 +36,8 @@ class RuaRepository(BaseRepository):
                 "comprimento": rua.comprimento,
                 "largura": rua.largura,
                 "talhao_id": rua.talhao_id
-            }, "id = %s", {"id": rua_id})  # Usando %s como placeholder para MySQL
-        except mysql.connector.Error as e:
+            }, "id = :1", {"id": rua_id})  # Usando :1 como placeholder para Oracle
+        except oracledb.Error as e:
             print(f"Erro ao atualizar rua ID {rua_id}: {e}")
 
     def deletar_rua(self, rua_id):
@@ -49,8 +47,8 @@ class RuaRepository(BaseRepository):
         :param rua_id: ID da rua a ser deletada.
         """
         try:
-            self.delete("rua", "id = %s", {"id": rua_id})  # Usando %s como placeholder para MySQL
-        except mysql.connector.Error as e:
+            self.delete("ruas", "id = :1", {"id": rua_id})  # Usando :1 como placeholder para Oracle
+        except oracledb.Error as e:
             print(f"Erro ao deletar rua ID {rua_id}: {e}")
 
     def obter_rua_por_id(self, rua_id):
@@ -77,12 +75,12 @@ class RuaRepository(BaseRepository):
         :param talhao_id: ID do talhão para filtrar as ruas.
         :return: Lista de ruas associadas ao talhão.
         """
-        query = "SELECT * FROM ruas WHERE talhao_id = %s"
-        cursor = self.connection.cursor(dictionary=True)
+        query = "SELECT * FROM ruas WHERE talhao_id = :1"  # Usando :1 como Oracle placeholder
+        cursor = self.connection.cursor()
         try:
             cursor.execute(query, (talhao_id,))
             return cursor.fetchall()
-        except mysql.connector.Error as e:
+        except oracledb.Error as e:
             print(f"Erro ao obter ruas para o talhão ID {talhao_id}: {e}")
             return []
         finally:

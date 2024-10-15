@@ -6,17 +6,21 @@ class ServiceProduto:
         self.repository = ProdutoRepository(connection)
     
     def menu(self):
-        print("\n=== CRUD Produto ===")
-        print("1. Criar Produto")
-        print("2. Ler Produto")
-        print("3. Atualizar Produto")
-        print("4. Deletar Produto")
-        print("5. Mostrar todos os Produtos")
-        print("0. Voltar ao menu principal")
+        return "Produto", [
+            "Criar Produto",
+            "Ler Produto",
+            "Atualizar Produto",
+            "Deletar Produto",
+            "Mostrar todos os Produtos"
+        ]
 
     def criar_produto(self):
         nome = input("Nome do produto: ")
-        produto = Produto(nome=nome)
+        dose_recomendada = input("Dose recomendada (opcional, pressione Enter para pular): ")
+        
+        # Criar o objeto Produto com ou sem dose recomendada
+        produto = Produto(nome=nome, dose_recomendada=dose_recomendada if dose_recomendada else None)
+        
         self.repository.salvar_produto(produto)
         print("Produto criado com sucesso.")
 
@@ -25,9 +29,8 @@ class ServiceProduto:
         produto = self.repository.obter_produto_por_id(id)
         if not produto:
             print("Produto não encontrado.")
-            return
         else:
-            print(f"ID: {produto['id']}, Nome: {produto['nome']}")
+            print(f"ID: {produto[0]}, Nome: {produto[1]}, Dose Recomendada: {produto[2] or 'Não especificada'}")
 
     def get_produto(self):
         id = int(input("ID do produto: "))
@@ -35,8 +38,7 @@ class ServiceProduto:
         if not produto:
             print("Produto não encontrado.")
             return None
-        else:
-            return produto
+        return produto
 
     def mostrar_todos_produtos(self):
         produtos = self.repository.obter_todos_produtos()
@@ -44,14 +46,17 @@ class ServiceProduto:
             print("Nenhum produto cadastrado.")
         else:
             for produto in produtos:
-                print(f"ID: {produto['id']}, Nome: {produto['nome']}")
+                print(f"ID: {produto[0]}, Nome: {produto[1]}, Dose Recomendada: {produto[2] or 'Não especificada'}")
 
     def atualizar_produto(self):
         id = int(input("ID do produto: "))
         produto = self.repository.obter_produto_por_id(id)
         if produto:
-            novo_nome = input(f"Novo nome do produto (atual: {produto['nome']}): ")
-            produto_atualizado = Produto(novo_nome)
+            novo_nome = input(f"Novo nome do produto (atual: {produto[1]}): ")
+            nova_dose = input(f"Nova dose recomendada (atual: {produto[2] or 'Não especificada'}): ")
+
+            # Atualizar o produto com o novo nome e dose recomendada
+            produto_atualizado = Produto(nome=novo_nome, dose_recomendada=nova_dose if nova_dose else None)
             produto_atualizado.id = id
             self.repository.atualizar_produto(id, produto_atualizado)
             print("Produto atualizado com sucesso.")
@@ -62,7 +67,7 @@ class ServiceProduto:
         id = int(input("ID do produto: "))
         produto = self.repository.obter_produto_por_id(id)
         if produto:
-            self.repository.deletar_produto(produto['id'])
+            self.repository.deletar_produto(produto[0])
             print("Produto deletado com sucesso.")
         else:
             print("Produto não encontrado.")

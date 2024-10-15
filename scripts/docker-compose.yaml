@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  oracle:
+    image: gvenzl/oracle-xe
+    container_name: oracle-db
+    ports:
+      - '1521:1521'   # Porta padrão do Oracle Database
+      - '5500:5500'   # Porta do Oracle EM Express (opcional)
+    environment:
+      - ORACLE_PASSWORD=your_password   # Defina a senha para SYS e SYSTEM
+    volumes:
+      - oracle-data:/opt/oracle/oradata # Persistência dos dados
+volumes:
+  oracle-data:
